@@ -1,32 +1,39 @@
 using System.Diagnostics;
+using System.Text.Json.Serialization;
 using ConsumeGenericWebAPI.Models;
+using ConsumeGenericWebAPI.ViewModels;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace ConsumeGenericWebAPI.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
+        private readonly HttpClient _httpClient;
+        private readonly string BaseUrl;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(HttpClient httpClient, IConfiguration configuration)
         {
-            _logger = logger;
+            _httpClient = httpClient;
+            BaseUrl = configuration["ApiSettings:APIBaseURL"];
         }
-
+        [HttpGet]
         public IActionResult Index()
         {
-            return View();
+            List<EmployeeVM> empList = new List<EmployeeVM>();
+            HttpResponseMessage response = _httpClient.GetAsync(BaseUrl+ "api/Employee/Get").Result;
+            if (response.IsSuccessStatusCode)
+            {
+                string data = response.Content.ReadAsStringAsync().Result;
+                empList = JsonConvert.DeserializeObject<List<EmployeeVM>>(data);
+            }
+            return View(empList);
         }
 
         public IActionResult Privacy()
         {
             return View();
-        }
-
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
     }
 }
