@@ -8,6 +8,7 @@ namespace ConsumeGenericWebAPI.ViewModels
         public int Id { get; set; }
         [Required]
         [DisplayName("Employee Name")]
+        [RegularExpression(@"^[a-zA-Z]+$", ErrorMessage = "Only alphabetic characters are allowed.")]
         public string Name { get; set; }
 
         [Required]

@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Text;
 using System.Text.Json.Serialization;
 using ConsumeGenericWebAPI.Models;
 using ConsumeGenericWebAPI.ViewModels;
@@ -22,7 +23,7 @@ namespace ConsumeGenericWebAPI.Controllers
         public IActionResult Index()
         {
             List<EmployeeVM> empList = new List<EmployeeVM>();
-            HttpResponseMessage response = _httpClient.GetAsync(BaseUrl+ "api/Employee/Get").Result;
+            HttpResponseMessage response = _httpClient.GetAsync(BaseUrl + "Employee/Get").Result;
             if (response.IsSuccessStatusCode)
             {
                 string data = response.Content.ReadAsStringAsync().Result;
@@ -31,8 +32,31 @@ namespace ConsumeGenericWebAPI.Controllers
             return View(empList);
         }
 
-        public IActionResult Privacy()
+        [HttpGet]
+        public IActionResult Create()
         {
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult Create(EmployeeVM emp)
+        {
+            try
+            {
+                string data = JsonConvert.SerializeObject(emp);
+                StringContent content = new StringContent(data, Encoding.UTF8, "application/json");
+                HttpResponseMessage httpResponse = _httpClient.PostAsync(BaseUrl + "Employee/Post", content).Result;
+                if (httpResponse.IsSuccessStatusCode)
+                {
+                    TempData["successMsg"] = "Employee Created Successfully";
+                    return RedirectToAction("Index");
+                }
+            }
+            catch (Exception ex)
+            {
+                TempData["errorMsg"] = ex.Message;
+                return View();
+            }
             return View();
         }
     }
