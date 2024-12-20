@@ -59,5 +59,90 @@ namespace ConsumeGenericWebAPI.Controllers
             }
             return View();
         }
+
+        [HttpGet]
+        public IActionResult Edit(int Id)
+        {
+            try
+            {
+                EmployeeVM emp = new EmployeeVM();
+                HttpResponseMessage httpResponse = _httpClient.GetAsync(BaseUrl + "Employee/GetById/" + Id).Result;
+                if (httpResponse.IsSuccessStatusCode)
+                {
+                    string data = httpResponse.Content.ReadAsStringAsync().Result;
+                    emp = JsonConvert.DeserializeObject<EmployeeVM>(data);
+                }
+                return View(emp);
+            }
+            catch (Exception ex)
+            {
+                TempData["errorMsg"] = ex.Message;
+                return View();
+            }
+
+        }
+
+        [HttpPost]
+        public IActionResult Edit(EmployeeVM emp)
+        {
+            try
+            {
+                string data = JsonConvert.SerializeObject(emp);
+                StringContent content = new StringContent(data, Encoding.UTF8, "application/json");
+                HttpResponseMessage httpResponse = _httpClient.PutAsync(BaseUrl + "Employee/Put/" + emp.Id, content).Result;
+                if (httpResponse.IsSuccessStatusCode)
+                {
+                    TempData["successMsg"] = "Employee Updated Successfully";
+                    return RedirectToAction("Index");
+                }
+            }
+            catch (Exception ex)
+            {
+                TempData["errorMsg"] = ex.Message;
+                return View();
+            }
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult Delete(int Id)
+        {
+            try
+            {
+                EmployeeVM emp = new EmployeeVM();
+                HttpResponseMessage httpResponse = _httpClient.GetAsync(BaseUrl + "Employee/GetById/" + Id).Result;
+                if (httpResponse.IsSuccessStatusCode)
+                {
+                    string data = httpResponse.Content.ReadAsStringAsync().Result;
+                    emp = JsonConvert.DeserializeObject<EmployeeVM>(data);
+                }
+                return View(emp);
+            }
+            catch (Exception ex)
+            {
+                TempData["errorMsg"] = ex.Message;
+                return View();
+            }
+        }
+
+        [HttpPost,ActionName("Delete")]
+        public IActionResult DeletePost(int Id)
+        {
+            try
+            {
+                HttpResponseMessage httpResponse = _httpClient.DeleteAsync(BaseUrl + "Employee/Delete/" + Id).Result;
+                if (httpResponse.IsSuccessStatusCode)
+                {
+                    TempData["successMsg"] = "Employee Deleted Successfully";
+                    return RedirectToAction("Index");
+                }
+            }
+            catch (Exception ex)
+            {
+                TempData["errorMsg"] = ex.Message;
+                return View();
+            }
+            return View();
+        }
     }
 }
